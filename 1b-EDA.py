@@ -122,7 +122,7 @@ cat.columns
 
 
 # In[26]:
-# Columns that I'm keeping
+# Categorical Columns that I'm keeping
 cols = ['host_id', 'host_name', 'host_since',
         'host_response_time',
          'host_is_superhost',
@@ -159,6 +159,7 @@ num = population.select_dtypes(include = ['float','int']).copy()
 # In[37]:
 
 # Columns I'm keeping 
+# Columns for numerical type
 cols2 = ['id',
        'host_listings_count',
        'latitude', 'longitude', 'accommodates',
@@ -208,32 +209,32 @@ sns.heatmap(population_final_columns.isna())
 
 # In[29]:
 
-
+# Looking at NAN values that are not plus
 plt.figure(figsize=(20,12))
 sns.heatmap(population_final_columns[population_final_columns['isPlus']==0].isna())
 
 # In[32]:
 
-
+# Looking at rows that are just plus
 just_plus = population_final_columns[population_final_columns['isPlus'] == 1]
 
 
 # In[33]:
 
-
+# A scatter plot of # of reviews vs review scores for plus rated listings
 sns.scatterplot(x='number_of_reviews',y='review_scores_rating',
                 data=just_plus)
 
 
 # In[34]:
 
-
+# Looking at rows that are not plus
 no_plus = population_final_columns[population_final_columns['isPlus'] != 1]
 
 
 # In[35]:
 
-
+# Selected variables that I feel potentially have some value
 see = ['accommodates',
        'bathrooms', 'bedrooms', 'beds','number_of_reviews',
        'review_scores_accuracy','review_scores_cleanliness', 
@@ -247,6 +248,7 @@ see = ['accommodates',
        'monthly_price', 'security_deposit', 'cleaning_fee', 
        'guests_included',
        'extra_people']
+# Print Average of all of the see list for only plus, non-plus, and all rows
 for i in see: 
     print(i)
     print("just_plus",sum(just_plus[i])/len(just_plus))
@@ -257,17 +259,9 @@ for i in see:
     
 
 
-# In[36]:
-
-
-g = sns.FacetGrid(no_plus                     
-                  , row = 'host_is_superhost', col = 'isPlus')
-g.map(plt.hist,"price")
-
-
 # In[37]:
 
-
+# Plots that show cross plots for various variables with hue set at plus 
 g = plt.figure()
 sns.pairplot(population_final_columns.fillna(0,axis=0),hue='isPlus',vars=see[5:11],)
 
@@ -286,7 +280,7 @@ sns.pairplot(population_final_columns.fillna("-1",axis=0),hue='isPlus',vars=see[
 
 # In[40]:
 
-
+# Prints percent of rows for the columns that have na values
 for i in population_final_columns.columns:
     print(i, str(sum(population_final_columns[i].isna())/len(population_final_columns)*100)[:5],'%')
 

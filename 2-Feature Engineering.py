@@ -1,5 +1,5 @@
 #%%
-
+# Imports
 import numpy as np 
 import pandas as pd 
 import os
@@ -8,7 +8,7 @@ try:
 	print(os.getcwd())
 except:
 	pass
-
+## Import csv from 1b 
 df = pd.read_csv('SanFranCleaner.csv', index_col='Unnamed: 0')
 df.head()
 
