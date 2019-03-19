@@ -1,13 +1,21 @@
 #%%
 # Imports
-import numpy as np 
-import pandas as pd 
-import os
-try:
-	os.chdir(os.path.join(os.getcwd(), '../2019 Spring/SpringAccel'))
-	print(os.getcwd())
-except:
-	pass
+import pickle
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import math
+am_i_local = "yes"
+if am_i_local == "yes":
+    try:
+        os.chdir(os.path.join(os.getcwd(), '../2019 Spring/SpringAccel'))
+        print(os.getcwd())
+    except:
+        pass
+from IPython.display import display
+
+pd.options.display.max_columns = None
 ## Import csv from 1b 
 df = pd.read_csv('SanFranCleaner.csv', index_col='Unnamed: 0')
 df.head()
@@ -42,8 +50,8 @@ df = df[df['state'].apply(lambda x: str(x).upper()) == 'CA']
 df['host_since'] = pd.to_datetime(df['host_since'])
 
 #%%
-# Finding # of listings each host have in LA area
-X = pd.DataFrame(df.groupby('host_id').size().reset_index()).rename(columns = {0: "listing_count_LA"})
+# Finding # of listings each host have in the area
+X = pd.DataFrame(df.groupby('host_id').size().reset_index()).rename(columns = {0: "listing_count"})
 df = df.merge(X , on = 'host_id',how = 'left' )
 
 #%%

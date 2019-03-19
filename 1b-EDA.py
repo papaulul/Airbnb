@@ -4,19 +4,22 @@
 # In[1]:
 
 # Imports
-import numpy as np
+import pickle
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+import math
+am_i_local = "yes"
+if am_i_local == "yes":
+    try:
+        os.chdir(os.path.join(os.getcwd(), '../2019 Spring/SpringAccel'))
+        print(os.getcwd())
+    except:
+        pass
 from IPython.display import display
 
 pd.options.display.max_columns = None
-
-try:
-	os.chdir(os.path.join(os.getcwd(), '../2019 Spring/SpringAccel'))
-	print(os.getcwd())
-except:
-	pass
 
 
 # In[2]:
