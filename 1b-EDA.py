@@ -3,7 +3,7 @@
 
 # In[1]:
 
-
+# Imports
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -23,18 +23,22 @@ except:
 
 
 #Read in dataset 
-#df = pd.read_csv('Airbnb_Listing_with_242Plus.csv',index_col = 0)
+# Readin file from 1a 
 df = pd.read_csv('SanFranListing_With_Plus.csv',index_col = 1)
 
 
 
 # In[3]:
-
-df.drop('Unnamed: 0', axis=1, inplace=True)
+# Drop weird column 
+try: 
+       df.drop('Unnamed: 0', axis=1, inplace=True)
+except: 
+       print("Dropping column didn't work")
 df.head()
 
 
 # In[4]:
+# Sometimes when 1a is run, isPlus column is changed 
 df.rename({'isPlus_y': 'isPlus'}, axis=1,inplace=True)
 
 df.columns
@@ -49,7 +53,7 @@ population = df[(df['isPlus'] == 1) | (df['host_is_superhost'] == 't')]
 
 # In[6]:
 
-
+# Sometimes, old index is there, uncomment drop columns if so
 population  = population.reset_index()#.drop(columns='index')
 
 
@@ -57,14 +61,11 @@ population  = population.reset_index()#.drop(columns='index')
 
 
 # type corrections 
-population['host_total_listings_count'] = population['host_total_listings_count'].astype(float)
-population['host_listings_count']=population['host_listings_count'].astype(float)
-population['accommodates']=population['accommodates'].astype(float)
 
-rest = ['guests_included','minimum_nights','maximum_nights']
-for i in rest: 
+to_floats = ['host_total_listings_count','host_listings_count','accommodates','guests_included','minimum_nights','maximum_nights']
+for i in to_floats: 
     population[i] = population[i].astype(float)
-    
+# Fixing money problems 
 money = ['price','weekly_price','monthly_price','security_deposit','cleaning_fee','extra_people']
 population['price']=population['price'].apply(lambda x: float("".join(list(x)[1:]).replace(',',"")))
 population['weekly_price'] = population['weekly_price'].apply(lambda x: 0 if str(x)[:1] != "$" else x)
@@ -86,10 +87,12 @@ population['host_response_rate']=population['host_response_rate'].apply(lambda x
 
 
 population.info()
-
+# Making sure that the NA in isPlus turn to 0
 population['isPlus'] = population['isPlus'].apply(lambda x: 1 if x==1 else 0)
 # In[21]:
 
+# Converting zipcode to object 
+population['zipcode'] = population['zipcode'].astype('object')
 
 # Looking at categorical columns 
 cat = population.select_dtypes(include = 'object').copy()
@@ -100,14 +103,14 @@ cat.head()
 
 # In[23]:
 
-
+# Number of unique values for each categorical columns
 for i in cat.columns:
     print(i,len(cat[i].unique()))
 
 
 # In[24]:
 
-
+# Number of null values for each categorical columns
 for i in cat.columns:
     print(i,sum(cat[i].isnull()))
 
@@ -119,7 +122,6 @@ cat.columns
 
 
 # In[26]:
-population['zipcode'] = population['zipcode'].astype('object')
 # Columns that I'm keeping
 cols = ['host_id', 'host_name', 'host_since',
         'host_response_time',
@@ -147,7 +149,7 @@ for i in cat[cols].columns:
     print(i,len(cat[i].unique()))
 
 # In[29]
-
+# Fixing types 
 population['id']=population['id'].astype('float')
 population['availability_30']=population['availability_30'].astype('int')
 # Looking at Numerical data
