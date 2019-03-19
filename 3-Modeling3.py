@@ -112,7 +112,7 @@ for i in isPlus_simil.index[1:]:
     for j in c_important:
         if i!=j:
             max_sim=max(max_sim,jac_sim.loc[i,j])
-    if max_sim>0 and max_sim<0.6 and jac_sim.loc[i,a]>.1:
+    if max_sim>0 and max_sim<0.6 and jac_sim.loc[i,'isPlus']>.1:
         c_important.append(i)
 # Append the important columns 
 feats.append(c_important)
