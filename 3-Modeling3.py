@@ -22,7 +22,7 @@ pd.options.display.max_columns = None
 sns.set_style('whitegrid')
 sns.set_palette("husl")
 
-å
+
 # In[2]:
 
 # Import from 2
