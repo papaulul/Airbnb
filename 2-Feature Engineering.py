@@ -17,7 +17,9 @@ from IPython.display import display
 
 pd.options.display.max_columns = None
 ## Import csv from 1b 
-df = pd.read_csv('SanFranCleaner.csv', index_col='Unnamed: 0')
+input_path= 'files/SanFran-1b.csv'
+output_path = 'files/SanFran-2.csv'
+df = pd.read_csv(input_path, index_col='Unnamed: 0')
 df.head()
 
 
@@ -94,6 +96,57 @@ for i in versus.columns:
 df_with_amenities = df.merge(versus, on = 'id', how = 'left')
 
 #%%
-df_with_amenities.to_csv('SanFranAmenitiespt2.csv')
+
+df = df_with_amenities.copy()
+
+# In[3]:
+# Finding Variables that have high correlation 
+high_corr = pd.DataFrame(df.corr().abs().unstack()[df.corr().abs().unstack().sort_values(kind="quicksort")>.9]).reset_index()
+print(high_corr[high_corr['level_0']!=high_corr['level_1']])
+#%% 
+# Removed variables with high correlations 
+d_list = ['calculated_host_listings_count','listing_count','number_of_amenities','Bath towel','Bedroom comforts','Body soap','Dishes and silverware','Toilet paper','Cooking basics','Dryer','Wide clearance to shower','amenities','availability_30','availability_365','availability_60','availability_90']
+df.drop(d_list,inplace=True, axis=1)
+df.head()
+
+# In[11]:
+
+# Finds index of where host_resposne_time is na and then set NAN value as unavaliable
+newvar = list(df[(df['host_response_time'].isna())].reset_index()['index'])
+for i in newvar:
+    df.set_value(i, 'host_response_time','Unavaliable')
+
+try: 
+    df.rename({"listing_count_LA": "listing_count"}, axis=1,inplace=True)
+except: 
+    print("Your file is fine :) ")
+# In[12]:
+## Drop Column with high sparsity or other issues 
+df.drop(['host_id','host_name','host_since','host_verifications','neighbourhood_cleansed','city','state','zipcode','market','smart_location','id','translation missing: en.hosting_amenity_49','translation missing: en.hosting_amenity_50','host_neighbourhood','weekly_price'],axis=1, inplace=True)
+# In[13]:
+cols = list(df.columns)
+cols = list(filter(lambda x: 'Unamed:' not in x,cols))
+df = df[cols]
+#Verify that none of the rows with Plus listings have null 
+# Dropping all rows with NA  cause doesn't affect Plus listings
+# Changes object types into dummy variables 
+items=list(df.select_dtypes('object').columns)
+for cols in items:
+    add = pd.get_dummies(df[cols],drop_first=True)
+    df=pd.concat([df,add], axis=1)
+
+df.rename({'Other': 'Other_Amen'}, axis=1,inplace=True)
+# Changes an integer types into boolean 
+# drop original categorical variables
+df.drop(items,axis=1, inplace= True)
+
+# In[19]:
+# confirms that isPlus is boolean
+df['isPlus'] = df['isPlus'].apply(lambda x: 1 if x == 1 else 0).astype('bool')
+df.dropna(axis=0,inplace=True)
+#%%
+df.to_csv(output_path)
+
+#%%
 
 #%%

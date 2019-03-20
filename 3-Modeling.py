@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
 # In[1]:
 ## Imports
 import pickle
@@ -17,83 +14,35 @@ if am_i_local == "yes":
     except:
         pass
 from IPython.display import display
-
 pd.options.display.max_columns = None
-
-
 sns.set_style('whitegrid')
 sns.set_palette("husl")
-
-
-# In[2]:
-
+#%%
 # Import from 2
-df = pd.read_csv('Airbnb_Listings_with_Amenitiespt2.csv',index_col = 0)
+file_path = 'Airbnb-2-moreplus.csv'
+df = pd.read_csv(file_path,index_col = 0)
 
-
-# In[3]:
-# Finding Variables that have high correlation 
-high_corr = pd.DataFrame(df.corr().abs().unstack()[df.corr().abs().unstack().sort_values(kind="quicksort")>.9]).reset_index()
-print(high_corr[high_corr['level_0']!=high_corr['level_1']])
-#%% 
-# Removed variables with high correlations 
-d_list = ['Bath towel','Bedroom comforts','Body soap','Dishes and silverware','Cooking basics','Dryer','Wide clearance to shower','amenities','availability_30','availability_365','availability_60','availability_90']
-df.drop(d_list,inplace=True, axis=1)
-df.head()
-
-# In[11]:
-
-# Finds index of where host_resposne_time is na and then set NAN value as unavaliable
-newvar = list(df[(df['host_response_time'].isna())].reset_index()['index'])
-for i in newvar:
-    df.set_value(i, 'host_response_time','Unavaliable')
-
-
-# In[12]:
-## Drop Column with high sparsity or other issues 
-df.drop(['host_id','host_name','host_since','host_verifications','neighbourhood_cleansed','city','state','zipcode','market','smart_location','id','Unnamed: 61','translation missing: en.hosting_amenity_49','translation missing: en.hosting_amenity_50','Toilet paper','listing_count_LA','number_of_amenities','host_neighbourhood','weekly_price'],axis=1, inplace=True)
-# In[13]:
-#Verify that none of the rows with Plus listings have null 
-# Dropping all rows with NA  cause doesn't affect Plus listings
-df.dropna(axis=0,inplace = True)
-
-
-# In[15]:
-
+#%%
 # Import modeling tools 
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import BernoulliNB
 from sklearn import preprocessing
+from sklearn.ensemble import RandomForestClassifier
 
 
 
-# In[17]:
+#%%
 
 
 # Making Judgment call: Removing some columns might add back later
-df_model = df.copy()
-# In[18]:
-# Changes an integer types into boolean 
-i64 = list(df_model.select_dtypes('int64').columns)
-for i in i64:
-    df_model[i] = df_model[i].astype('bool')
-# Changes object types into dummy variables 
-items=list(df_model.select_dtypes('object').columns)
-for cols in items:
-    add = pd.get_dummies(df_model[cols],drop_first=True)
-    df_model=pd.concat([df_model,add], axis=1)
-# drop original categorical variables
-df_model.drop(items,axis=1, inplace= True)
-
-# In[19]:
+df_model = df.reset_index().drop('index',axis=1).copy()
+#%%
 # Run a Jaccard similarity on nonPlus vs isPlus population
 from sklearn.metrics import classification_report,confusion_matrix
 from sklearn.metrics.pairwise import pairwise_distances
 # All important features will be put here 
 feats = []
-# confirms that isPlus is boolean
-df_model['isPlus'] = df_model['isPlus'].astype('bool')
 # grabs all boolean variables 
 d_base_bool=df_model.select_dtypes(include='bool')
 
@@ -120,14 +69,13 @@ df_model['isPlus'] = df_model['isPlus'].astype('float')
 
 #%%
 important_cols = feats[0]
+print("Here are the important columns: ", important_cols)
 #%%
-# Setting up empty Dataframe that will contain all scores from modeling 
-scores = pd.DataFrame(columns=['BNB_TP','BNB_FP','log_TP','log_FP','BNB_TP_f','BNB_FP_f','log_TP_f','log_FP_f'])
 # Contains all columns that make the cut
 good_model = ['isPlus']
 
 # Training and testing on Bernoulli Naive Bayes, Logistic Regression with and without Feature Selection 
-def success(Iter, model_Name, full = 1): 
+def success(Iter, model_Name, met,full = True ): 
     """
     Inputs: 
         Iter: Current iteration in loop, will be an int
@@ -139,16 +87,25 @@ def success(Iter, model_Name, full = 1):
     """
     filename = model_Name + str(Iter) + '.sav'
     pickle.dump(model, open(filename, 'wb'))
-    print('saved')
     colname = model_Name + str(Iter) + '_pred'
-    if full == 1: 
+    if full: 
         df_model[colname] = model.predict(df_model.drop(good_model,axis=1))
         
     else:
         df_model[colname] = model.predict(df_features_only.drop('isPlus',axis=1))
     good_model.append(colname)
-    print("done")
-
+    print(colname, " is saved with metric: ", met)
+def met(TP,FP,FN): 
+    """
+    Inputs: 
+        TP: True Positives
+        FP: False Postitives
+        FN: False Negatives 
+    Objective: 
+        Give an 'error' to the model based on FN 
+        formula: 1 - (TP+FP)/(TP+FP +FN) = FN/(TP+FP+FN)
+    """
+    return 1 - (float(TP) + float(FP))/(float(TP) + float(FP)+ float(FN))
 def model_train_predict_matrix(model_type): 
     """
     Input: 
@@ -162,12 +119,14 @@ def model_train_predict_matrix(model_type):
         model = BernoulliNB()
     elif model_type == 'log':
         model = LogisticRegression(class_weight='balanced')
+    elif model_type == 'rf':
+        model = RandomForestClassifier(n_estimators = 1500, max_features = 20, n_jobs = -1, warm_start=False)
     else: 
         return [0,0]
     model.fit(X_train,y_train)
     predictions = model.predict(X_test)
-    _,FP,_,TP = confusion_matrix(y_test, predictions).ravel()
-    return [TP,FP,model]
+    _,FP,FN,TP = confusion_matrix(y_test, predictions).ravel()
+    return [TP,FP,model ,FN]
 
 #%%
 df_features_only = df_model.copy()
@@ -177,54 +136,81 @@ for i in df_features_only.columns:
             df_features_only.drop(i,axis=1,inplace = True)
     except:
             pass
+#%%
+# K-Fold to determine the best model 
+from sklearn.model_selection import StratifiedKFold
+skf = StratifiedKFold(4, shuffle= True)
 
 #%%
+scores = pd.DataFrame(columns=['BNB_met','log_met','rf_met','BNB_f_met','log_f_met','rf_f_met'])
+df_model.reset_index().drop('index',axis=1,inplace=True)
+good_model = ['isPlus']
+Iter = 1
+
+for train_index, test_index in skf.split(df_model.drop('isPlus',axis=1),df_model['isPlus']):
+    X_train, X_test = df_model.loc[train_index].drop(good_model, axis=1),df_model.loc[test_index].drop(good_model, axis=1)
+    y_train, y_test = df_model['isPlus'].loc[train_index], df_model['isPlus'].loc[test_index]
+    # BNB
+    for i in [X_train,X_test,y_train,y_test]:
+        i.dropna(axis=0,inplace=True)
+    
+    for m_name in ['BNB','log','rf']: 
+        TP,FP, model, FN = model_train_predict_matrix(m_name)
+        metric = met(TP,FP,FN)
+        col = m_name +"_met"
+        scores.loc[int(Iter),col] = metric
+
+    # feature selection    
+    X_train = X_train[df_features_only.drop('isPlus',axis=1).columns]
+    X_test = X_test[df_features_only.drop('isPlus',axis=1).columns]
+
+    for m_name in ['BNB','log','rf']: 
+        TP,FP, model, FN = model_train_predict_matrix(m_name)
+        metric = met(TP,FP,FN)
+        col = m_name +"_f_met"
+        scores.loc[int(Iter),col] = metric
+
+    Iter += 1
+
+for i in scores.columns: 
+    scores[i]=scores[i].astype('float')
+
+print(scores.describe())
+
+#%%
+scores = pd.DataFrame(columns=['BNB_met','log_met','rf_met','BNB_f_met','log_f_met','rf_f_met'])
+
 for Iter in range(1,21):
     # New train test
     X_train, X_test, y_train, y_test = train_test_split(df_model.drop(good_model,axis= 1),df_model['isPlus'],train_size = 0.75,stratify=df_model['isPlus'])
-    # BNB
-    BNB_TP,BNB_FP,model=model_train_predict_matrix('BNB')
-    if int(BNB_TP) >= 66:
-        success(Iter, 'BNB')
-
-    # Log
-    log_TP,log_FP,model = model_train_predict_matrix('log')
-    if int(log_TP) >= 66:
-        success(Iter, 'log')
     
+    for m_name in ['BNB','log','rf']: 
+        TP,FP, model, FN = model_train_predict_matrix(m_name)
+        metric = met(TP,FP,FN)
+        col = m_name +"_met"
+        scores.loc[int(Iter),col] = metric
+        if int(TP) >= 66 and metric < .05:
+            success(Iter, m_name,metric)
+
+
     # feature selection    
-    for k in [X_train, X_test]:
-        for i in k.columns:
-            try: 
-                if k[i].dtype == 'bool' and i not in important_cols:
-                    k.drop(i,axis=1,inplace = True)
-            except:
-                    pass
-    # BNB w/ Feature selection
-    BNB_TP_f,BNB_FP_f,model = model_train_predict_matrix('BNB')
-    if int(BNB_TP_f) >= 66:
-        success(Iter, 'BNB_f',0)
+    X_train = X_train[df_features_only.drop('isPlus',axis=1).columns]
+    X_test = X_test[df_features_only.drop('isPlus',axis=1).columns]
 
-    # Log w/ Feature selection
-    log_TP_f,log_FP_f,model = model_train_predict_matrix('log')
-    if int(log_TP_f) >= 66:
-        success(Iter, 'log_f',0)
-    
-    scores.loc[Iter] = [ BNB_TP , BNB_FP , log_TP , log_FP , BNB_TP_f , BNB_FP_f , log_TP_f , log_FP_f ]
+    for m_name in ['BNB','log','rf']: 
+        TP,FP, model, FN = model_train_predict_matrix(m_name)
+        metric = met(TP,FP,FN)
+        col = m_name +"_f_met"
+        scores.loc[int(Iter),col] = metric
+        file = m_name+"_f"
+        if int(TP) >= 66 and metric < .05:
+            success(Iter, file,metric, False )
 
 #%% 
 for i in scores.columns: 
-    scores[i]=scores[i].astype('int')
+    scores[i]=scores[i].astype('float')
 #%% 
 print(scores.describe()) 
-#%%
-scores['BNB_TP'] + scores['BNB_FP']
-scores['BNB_TP_f'] + scores['BNB_FP_f']
-scores['log_TP'] + scores['log_FP']
-scores['log_TP_f'] + scores['log_FP_f']
-
-#%%
-
 #%%
 for i in df_model.select_dtypes('uint8'):
     df_model[i] = df_model[i].astype('bool')
@@ -281,11 +267,12 @@ for i in feats:
     for j in i:
         if j not in new and j not in feats[0]:
             new.append(j)
-print(new)
+print("Here are the new features we found from modeling : ", new)
 
 
 #%%
 """
+# Look at feature importance later
 from sklearn.ensemble import RandomForestRegressor
 X = df_features_only.drop('isPlus',axis=1)
 Y = df_model[preds[0]]
@@ -296,3 +283,13 @@ print("Features sorted by their score:")
 for i in (sorted(zip(map(lambda x: round(x, 4), rf.feature_importances_), names),reverse=True)):
     print(i)
 """
+
+#%%
+# Bootstrap 
+"""
+n = len(df_model)
+choice = list(range(0,n))
+ind = np.random.choice(choice, size = n, replace = True)
+df_boot = df_model.loc[ind]
+"""
+#%%

@@ -76,3 +76,13 @@ perfect_models/log_f5.sav
 perfect_models/log_f7.sav
 perfect_models/log_f8.sav
 perfect_models/log_f9.sav
+files/SanFran-1a.csv
+files/SanFran-1b.csv
+files/SanFran-2.csv
+files/Airbnb-1a-moreplus.csv
+files/Airbnb-1a.csv
+files/Airbnb-1b-moreplus.csv
+files/Airbnb-1b.csv
+files/Airbnb-2-moreplus.csv
+files/Airbnb-2.csv
+Modelling.py
