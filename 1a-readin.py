@@ -20,67 +20,51 @@ from IPython.display import display
 
 pd.options.display.max_columns = None
 
-
+json_input = 'Airbnb/la.json' 
+csv_input = 'files/LA_3_19.csv'
+csv_output = 'files/LA-1a.csv'
 #%% 
 # Read in the json files as dataframes 
-place = pd.read_json()
-
-#%%
-# Create list of the name of all dataframes 
-all_places = [place]
+place = pd.read_json(json_input)
 
 #%%
 # Remove json brackets and such for both columns 
-for i in all_places: 
-    i['title'] = i['title'].apply(lambda x: str(x)[2:-2])
-    i['name'] = i['name'].apply(lambda x: str(x)[2:].split(",")[0])
+place['title'] = place['title'].apply(lambda x: str(x)[1:-1].replace("'","").replace('"',''))
+place['name'] = place['name'].apply(lambda x: str(x).split(",")[1].replace("'","").replace("]","").strip() if len(x)> 0 else '' )
 
 
 
 #%%
 # Fill in empty as NAN 
-for i in all_places: 
-    for j in ['name','title']:
-        i[j] = i[j].apply(lambda x: np.NAN if len(x) == 0 else x)
+for j in ['name','title']:
+    place[j] = place[j].apply(lambda x: np.NAN if len(x) == 0 else x)
 
 #%%
 # seeing how many NAN we are dealing with for each column 
-for k,i in enumerate(all_places): 
-    for j in ['name','title']:
-        print(k,str(j),sum(i[j].isna()))
+for j in ['name','title']:
+    print(str(j),sum(place[j].isna()))
 #%%
 # Creating unique id
-for i in all_places:
-    i['id'] = i['name']+"|" + i['title']
+place['uid'] = place['name']+"|" + place['title']
 #%%
 # removing NAN before merge
-for i in all_places:
-    i.dropna(inplace= True)
+place.dropna(axis= 0, inplace= True)
+place.drop_duplicates(inplace=True)
 #%% 
-# Ideally, merge all until you get final amount you are looking for
-final = sanfran1.merge(sanfran2, on = 'id', how = 'outer')
-#%%
-# Repairing id to name and title 
-final['name']=final['id'].apply(lambda x: x.split("|")[0])
-final['title']= final['id'].apply(lambda x: x.split("|")[1])
-
-#%%
-# setting table as name and title only
-final = final[['name','title']]
-final=final.rename({'name': 'host_name', 'title': 'name'},axis=1)
+place=place.rename({'name': 'host_name', 'title': 'name'},axis=1)
 #%%
 # Reading in file with all pulled data 
 # Data is from InsideAirbnb
-all_listings = pd.read_csv('')
+all_listings = pd.read_csv(csv_input)
 
 #%%
 # Creating a unique id so i can perform a left join 
 all_listings['uid'] = all_listings['host_name'] + "|" + all_listings['name']
-final['uid'] = final['host_name'] + "|" + final['name']
+place['uid'] = place['host_name'] + "|" + place['name']
 #%%
 # Setting the isPlus column with the merge
-final['isPlus'] = 1
-all_listings = all_listings.merge(final[['uid','isPlus']], on = 'uid', how = 'left' )
+place['isPlus'] = 1
+all_listings = all_listings.merge(place[['uid','isPlus']], on = 'uid', how = 'left' )
 
 #%%
 # Seeing how many plus listings survived the merge
@@ -88,6 +72,6 @@ sum(all_listings['host_is_superhost'].apply(lambda x: 1 if x =='t' else 0 ))
 
 #%%
 # creates file for the next state 
-all_listings.to_csv('')
+all_listings.to_csv(csv_output)
 
 #%%

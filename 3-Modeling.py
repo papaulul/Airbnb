@@ -148,7 +148,6 @@ scores = pd.DataFrame(columns=['BNB_met','log_met','rf_met','BNB_f_met','log_f_m
 df_model.reset_index().drop('index',axis=1,inplace=True)
 good_model = ['isPlus']
 Iter = 1
-
 for train_index, test_index in skf.split(df_model.drop('isPlus',axis=1),df_model['isPlus']):
     X_train, X_test = df_model.loc[train_index].drop(good_model, axis=1),df_model.loc[test_index].drop(good_model, axis=1)
     y_train, y_test = df_model['isPlus'].loc[train_index], df_model['isPlus'].loc[test_index]
@@ -178,7 +177,6 @@ for i in scores.columns:
     scores[i]=scores[i].astype('float')
 
 print(scores.describe())
-
 #%%
 scores = pd.DataFrame(columns=['BNB_met','log_met','rf_met','BNB_f_met','log_f_met','rf_f_met'])
 
@@ -192,9 +190,11 @@ for Iter in range(1,21):
         metric = met(TP,FP,FN)
         col = m_name +"_met"
         scores.loc[int(Iter),col] = metric
+        
         if int(TP) >= 66 and metric < .05:
             success(Iter, m_name,metric)
-
+        
+        #success(Iter, m_name,metric)
 
     # feature selection    
     X_train = X_train[df_features_only.drop('isPlus',axis=1).columns]
@@ -207,8 +207,12 @@ for Iter in range(1,21):
         col = m_name +"_f_met"
         scores.loc[int(Iter),col] = metric
         file = m_name+"_f"
+                
         if int(TP) >= 66 and metric < .05:
             success(Iter, file,metric, False )
+        
+        #success(Iter, file,metric, False )
+
 #%% 
 for i in scores.columns: 
     scores[i]=scores[i].astype('float')

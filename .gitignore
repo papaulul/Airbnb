@@ -87,3 +87,8 @@ files/Airbnb-2-moreplus.csv
 files/Airbnb-2.csv
 Modelling.py
 models/*
+files/*
+Airbnb/la.json
+Airbnb/plus-links.csv
+Airbnb/sf.json 
+Airbnb/SFplus-links.csv
