@@ -85,7 +85,7 @@ def success(Iter, model_Name, met,full = True ):
         creates new column in df_model with the current model's prediction 
 
     """
-    filename = model_Name + str(Iter) + '.sav'
+    filename = 'models/'+model_Name + str(Iter) + '.sav'
     pickle.dump(model, open(filename, 'wb'))
     colname = model_Name + str(Iter) + '_pred'
     if full: 
@@ -94,6 +94,7 @@ def success(Iter, model_Name, met,full = True ):
     else:
         df_model[colname] = model.predict(df_features_only.drop('isPlus',axis=1))
     good_model.append(colname)
+    print(X_train.shape)
     print(colname, " is saved with metric: ", met)
 def met(TP,FP,FN): 
     """
@@ -125,6 +126,7 @@ def model_train_predict_matrix(model_type):
         return [0,0]
     model.fit(X_train,y_train)
     predictions = model.predict(X_test)
+
     _,FP,FN,TP = confusion_matrix(y_test, predictions).ravel()
     return [TP,FP,model ,FN]
 
@@ -184,7 +186,8 @@ for Iter in range(1,21):
     # New train test
     X_train, X_test, y_train, y_test = train_test_split(df_model.drop(good_model,axis= 1),df_model['isPlus'],train_size = 0.75,stratify=df_model['isPlus'])
     
-    for m_name in ['BNB','log','rf']: 
+    #for m_name in ['BNB','log','rf']: 
+    for m_name in ['log']: 
         TP,FP, model, FN = model_train_predict_matrix(m_name)
         metric = met(TP,FP,FN)
         col = m_name +"_met"
@@ -197,7 +200,8 @@ for Iter in range(1,21):
     X_train = X_train[df_features_only.drop('isPlus',axis=1).columns]
     X_test = X_test[df_features_only.drop('isPlus',axis=1).columns]
 
-    for m_name in ['BNB','log','rf']: 
+    #for m_name in ['BNB','log','rf']: 
+    for m_name in ['log']: 
         TP,FP, model, FN = model_train_predict_matrix(m_name)
         metric = met(TP,FP,FN)
         col = m_name +"_f_met"
@@ -205,7 +209,6 @@ for Iter in range(1,21):
         file = m_name+"_f"
         if int(TP) >= 66 and metric < .05:
             success(Iter, file,metric, False )
-
 #%% 
 for i in scores.columns: 
     scores[i]=scores[i].astype('float')

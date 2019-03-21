@@ -105,7 +105,7 @@ high_corr = pd.DataFrame(df.corr().abs().unstack()[df.corr().abs().unstack().sor
 print(high_corr[high_corr['level_0']!=high_corr['level_1']])
 #%% 
 # Removed variables with high correlations 
-d_list = ['calculated_host_listings_count','listing_count','number_of_amenities','Bath towel','Bedroom comforts','Body soap','Dishes and silverware','Toilet paper','Cooking basics','Dryer','Wide clearance to shower','amenities','availability_30','availability_365','availability_60','availability_90']
+d_list = ['calculated_host_listings_count','number_of_amenities','Bath towel','Bedroom comforts','Body soap','Dishes and silverware','Toilet paper','Cooking basics','Dryer','Wide clearance to shower','amenities','availability_30','availability_365','availability_60','availability_90']
 df.drop(d_list,inplace=True, axis=1)
 df.head()
 
@@ -144,9 +144,10 @@ df.drop(items,axis=1, inplace= True)
 # confirms that isPlus is boolean
 df['isPlus'] = df['isPlus'].apply(lambda x: 1 if x == 1 else 0).astype('bool')
 df.dropna(axis=0,inplace=True)
+#df.drop('',axis=1,inplace=True)
 #%%
 df.to_csv(output_path)
 
-#%%
+
 
 #%%
