@@ -21,13 +21,14 @@ from IPython.display import display
 
 pd.options.display.max_columns = None
 
-
+csv_input = 'files/LA-1a.csv'
+csv_output = 'files/LA-1b.csv'
 # In[2]:
 
 
 #Read in dataset 
 # Readin file from 1a 
-df = pd.read_csv('SanFranListing_With_Plus.csv',index_col = 1)
+df = pd.read_csv(csv_input)
 
 
 
@@ -57,7 +58,7 @@ population = df[(df['isPlus'] == 1) | (df['host_is_superhost'] == 't')]
 # In[6]:
 
 # Sometimes, old index is there, uncomment drop columns if so
-population  = population.reset_index()#.drop(columns='index')
+#population  = population.reset_index()#.drop(columns='index')
 
 
 # In[7]:
@@ -65,7 +66,7 @@ population  = population.reset_index()#.drop(columns='index')
 
 # type corrections 
 
-to_floats = ['host_total_listings_count','host_listings_count','accommodates','guests_included','minimum_nights','maximum_nights']
+to_floats = ['host_total_listings_count','square_feet','host_listings_count','accommodates','guests_included','minimum_nights','beds','maximum_nights']
 for i in to_floats: 
     population[i] = population[i].astype(float)
 # Fixing money problems 
@@ -316,7 +317,7 @@ population_final_columns.head()
 # In[44]:
 
 # To CSV
-population_final_columns.to_csv('SanFranCleaner.csv')
+population_final_columns.to_csv(csv_output)
 
 
 # In[ ]:

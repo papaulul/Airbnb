@@ -17,8 +17,8 @@ from IPython.display import display
 
 pd.options.display.max_columns = None
 ## Import csv from 1b 
-input_path= 'files/SanFran-1b.csv'
-output_path = 'files/SanFran-2.csv'
+input_path= 'files/SF-1b.csv'
+output_path = 'files/SF-2.csv'
 df = pd.read_csv(input_path, index_col='Unnamed: 0')
 df.head()
 
@@ -103,6 +103,7 @@ df = df_with_amenities.copy()
 # Finding Variables that have high correlation 
 high_corr = pd.DataFrame(df.corr().abs().unstack()[df.corr().abs().unstack().sort_values(kind="quicksort")>.9]).reset_index()
 print(high_corr[high_corr['level_0']!=high_corr['level_1']])
+
 #%% 
 # Removed variables with high correlations 
 d_list = ['calculated_host_listings_count','number_of_amenities','Bath towel','Bedroom comforts','Body soap','Dishes and silverware','Toilet paper','Cooking basics','Dryer','Wide clearance to shower','amenities','availability_30','availability_365','availability_60','availability_90']
@@ -132,7 +133,7 @@ df = df[cols]
 # Changes object types into dummy variables 
 items=list(df.select_dtypes('object').columns)
 for cols in items:
-    add = pd.get_dummies(df[cols],drop_first=True)
+    add = pd.get_dummies(df[cols],drop_first=True).astype('bool')
     df=pd.concat([df,add], axis=1)
 
 df.rename({'Other': 'Other_Amen'}, axis=1,inplace=True)
@@ -144,7 +145,7 @@ df.drop(items,axis=1, inplace= True)
 # confirms that isPlus is boolean
 df['isPlus'] = df['isPlus'].apply(lambda x: 1 if x == 1 else 0).astype('bool')
 df.dropna(axis=0,inplace=True)
-#df.drop('',axis=1,inplace=True)
+df.drop('',axis=1,inplace=True)
 #%%
 df.to_csv(output_path)
 

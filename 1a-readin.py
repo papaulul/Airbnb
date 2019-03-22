@@ -74,4 +74,3 @@ sum(all_listings['host_is_superhost'].apply(lambda x: 1 if x =='t' else 0 ))
 # creates file for the next state 
 all_listings.to_csv(csv_output)
 
-#%%
