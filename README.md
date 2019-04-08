@@ -1,3 +1,4 @@
 # Airbnb Plus Listing Analysis
 
-In 8 weeks, we were tasked with go through a project's completeion 
+## Problem
+Airbnb has implemented a new program called Airbnb Plus. 
