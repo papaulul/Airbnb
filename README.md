@@ -11,5 +11,10 @@ Why would owners want to go through the effort to achieve this rating? According
   * Professional photography
   * 7 times more listing views
   * 70% more nights book 
+## Solution
+Using data from [Inside Airbnb](http://insideairbnb.com/get-the-data.html) and personally scraped data, I will be looking into two cities, Los Angeles and San Fransico. 
+
+## Dependencies/Setup 
+
 
 
