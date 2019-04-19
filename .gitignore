@@ -64,6 +64,6 @@ Modelling.py
 models/*
 files/*
 Airbnb/*
-Airbnb/Airbnb
+Airbnb/Airbnb/*
 .vscode/*
 .ipynb_checkpoints/*
