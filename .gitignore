@@ -50,32 +50,7 @@ files/test3.json
 files/test4.json
 files/try2.json
 files/try3.json
-perfect_models/log10.sav
-perfect_models/log20.sav
-perfect_models/log4.sav
-perfect_models/log46.sav
-perfect_models/log47.sav
-perfect_models/log_f10.sav
-perfect_models/log_f10.sav copy
-perfect_models/log_f14.sav
-perfect_models/log_f18.sav
-perfect_models/log_f2.sav
-perfect_models/log_f20.sav
-perfect_models/log_f22.sav
-perfect_models/log_f28.sav
-perfect_models/log_f3.sav
-perfect_models/log_f34.sav
-perfect_models/log_f35.sav
-perfect_models/log_f36.sav
-perfect_models/log_f4.sav
-perfect_models/log_f4.sav copy
-perfect_models/log_f40.sav
-perfect_models/log_f47.sav
-perfect_models/log_f49.sav
-perfect_models/log_f5.sav
-perfect_models/log_f7.sav
-perfect_models/log_f8.sav
-perfect_models/log_f9.sav
+perfect_models/*
 files/SanFran-1a.csv
 files/SanFran-1b.csv
 files/SanFran-2.csv
