@@ -20,9 +20,9 @@ from IPython.display import display
 
 pd.options.display.max_columns = None
 
-json_input = 'Airbnb/la.json' 
-csv_input = 'files/LA_3_19.csv'
-csv_output = 'files/LA-1a.csv'
+json_input = 'Airbnb/sf.json' 
+csv_input = 'files/SanFran_3_19.csv'
+csv_output = 'files/SF-1a.csv'
 #%% 
 # Read in the json files as dataframes 
 place = pd.read_json(json_input)
@@ -70,7 +70,9 @@ all_listings = all_listings.merge(place[['uid','isPlus']], on = 'uid', how = 'le
 # Seeing how many plus listings survived the merge
 sum(all_listings['host_is_superhost'].apply(lambda x: 1 if x =='t' else 0 ))
 
+population = all_listings[(all_listings['isPlus'] == 1) | (all_listings['host_is_superhost'] == 't')]
+
 #%%
 # creates file for the next state 
-all_listings.to_csv(csv_output)
+population.to_csv(csv_output)
 

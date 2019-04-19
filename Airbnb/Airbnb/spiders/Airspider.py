@@ -30,10 +30,10 @@ class AirspiderSpider(scrapy.Spider):
         sure your chromedriver is in the parameter
         """
         #Mac
-        #self.driver = webdriver.Chrome('/Users/Work/Downloads/chromedriver')
+        self.driver = webdriver.Chrome('/Users/Work/Downloads/chromedriver')
 
         #Windows
-        self.driver = webdriver.Chrome('C:\\Users\\Paul\\Desktop\\chromedriver')
+        #self.driver = webdriver.Chrome('C:\\Users\\Paul\\Desktop\\chromedriver')
 
 
     def parse(self, response):
