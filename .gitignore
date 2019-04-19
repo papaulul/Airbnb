@@ -63,9 +63,7 @@ files/Airbnb-2.csv
 Modelling.py
 models/*
 files/*
-Airbnb/la.json
-Airbnb/plus-links.csv
-Airbnb/sf.json 
-Airbnb/SFplus-links.csv
 Airbnb/*
-Airbnb/Airbnb/*
+Airbnb/Airbnb
+.vscode/*
+.ipynb_checkpoints/*
