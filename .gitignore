@@ -63,7 +63,7 @@ files/Airbnb-2.csv
 Modelling.py
 models/*
 files/*
-Airbnb/*
-Airbnb/Airbnb
+Airbnb/air.csv
+Airbnb/airbnb_plus.csv
 .vscode
 .ipynb_checkpoints
