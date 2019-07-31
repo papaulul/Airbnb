@@ -13,7 +13,7 @@ import math
 am_i_local = "yes"
 if am_i_local == "yes":
     try:
-        os.chdir(os.path.join(os.getcwd(), '../2019 Spring/SpringAccel'))
+        os.chdir(os.path.join(os.getcwd(), '../SpringAccel'))
         print(os.getcwd())
     except:
         pass
@@ -24,8 +24,6 @@ pd.options.display.max_columns = None
 csv_input = 'files/LA-1a.csv'
 csv_output = 'files/LA-1b.csv'
 # In[2]:
-
-
 #Read in dataset 
 # Readin file from 1a 
 df = pd.read_csv(csv_input)
@@ -42,8 +40,7 @@ df.head()
 
 
 # In[4]:
-# Sometimes when 1a is run, isPlus column is changed 
-df.rename({'isPlus_y': 'isPlus'}, axis=1,inplace=True)
+df['isPlus'] = df['isPlus'].apply(lambda x: 1 if x == 1 else 0)
 
 df.columns
 
@@ -91,8 +88,6 @@ population['host_response_rate']=population['host_response_rate'].apply(lambda x
 
 
 population.info()
-# Making sure that the NA in isPlus turn to 0
-population['isPlus'] = population['isPlus'].apply(lambda x: 1 if x==1 else 0)
 # In[21]:
 
 # Converting zipcode to object 
@@ -116,7 +111,7 @@ for i in cat.columns:
 
 # Number of null values for each categorical columns
 for i in cat.columns:
-    print(i,sum(cat[i].isnull()))
+    print(i,sum(cat[i].isnull())/len(cat[i]))
 
 
 # In[25]:
