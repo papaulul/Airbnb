@@ -108,11 +108,46 @@ df['isPlus'] = df['isPlus'].apply(lambda x: 1 if x == 1 else 0).astype('bool')
 
 #%%
 plt.scatter(df['bathrooms'],df['bedrooms'])
-#%%
+
+print(df[df['bedrooms'].isna()][['bedrooms','bathrooms']])
+
+print(df[df['bathrooms'].isna()][['bedrooms','bathrooms']])
+
+bedroom_1 = df[df['bathrooms']==1]['bedrooms'].dropna().mean()
+bedroom_1_ind = df[(df['bathrooms']==1) & (df['bedrooms'].isna())].index
+bedroom_2 = df[df['bathrooms']==2]['bedrooms'].dropna().mean()
+bedroom_2_ind = df[(df['bathrooms']==2) & (df['bedrooms'].isna())].index
+bathroom_1 = df[df['bedrooms']==1]['bathrooms'].dropna().mean()
+bathroom_1_ind = df[(df['bedrooms']==1) & (df['bathrooms'].isna())].index
+
+for ind in bedroom_1_ind:
+    df.at[ind,'bedrooms'] = bedroom_1 
+
+for ind in bedroom_2_ind:
+    df.at[ind,'bedrooms'] = bedroom_2 
+    
+for ind in bathroom_1_ind: 
+    df.at[ind,'bathrooms'] = bathroom_1 
 
 
 #%%
-df.dropna(axis=0,inplace=True)
+from sklearn.linear_model import LinearRegression
+#%%
+df_no_na = df.copy().dropna(0)
+review_na_cols = [cols for cols in df_no_na.columns if "review_scores" in cols]
+object_cols = list(df_no_na.select_dtypes("object").columns)
+X = df_no_na.drop(review_na_cols+object_cols, 1).as_matrix()
+for cols in review_na_cols:
+    y = df_no_na[cols].dropna().as_matrix()
+    to_pred = df[df[cols].isna()].drop(review_na_cols+object_cols,1).as_matrix()
+    lin = LinearRegression()
+    lin.fit(X,y)
+    pred = lin.predict(to_pred)
+    df[cols].loc[df[cols].isna()] = pred
+
+#%%
+for cols in review_na_cols:
+    df[cols] = df[cols].apply(lambda x: 100 if x > 100 else int(x))
 #%%
 df.to_csv(output_path)
 
