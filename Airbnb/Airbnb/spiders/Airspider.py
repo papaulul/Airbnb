@@ -9,12 +9,12 @@ class AirspiderSpider(scrapy.Spider):
     allowed_domains = ['airbnb.com']
     temp = []
     #with open('../files/listings_LA_7_8.csv') as csvfile:
-    with open('C:\\Users\\Paul\\Dropbox\\Projects\\SpringAccel\\files\\listings_LA_7_8.csv', encoding="utf8") as csvfile:
+    #with open('C:\\Users\\Paul\\Dropbox\\Projects\\SpringAccel\\files\\listings_LA_7_8.csv', encoding="utf8") as csvfile:
+    with open('../files/listings_SF_7_8.csv') as csvfile:
         readCSV = csv.reader(csvfile, delimiter = ',')
         for row in readCSV:
             temp.append(row[1])
     start_urls = temp[1:]
-    print(start_urls)
 
     def parse(self, response):
         if len(response.xpath('//div[@class="_gor68n"]//title/text()').extract()) > 0:

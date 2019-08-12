@@ -17,8 +17,8 @@ from IPython.display import display
 
 pd.options.display.max_columns = None
 ## Import csv from 1b 
-input_path= 'files/LA-1b.csv'
-output_path = 'files/LA-2.csv'
+input_path= 'files/july19/LA_1b.csv'
+output_path = 'files/july19/LA_2.csv'
 df = pd.read_csv(input_path, index_col='Unnamed: 0')
 df.head()
 
@@ -48,7 +48,7 @@ list_of_all_amenities = sorted(list(set(list_of_all_amenities)))
 
 #%%
 df['amenities'] = df['amenities'].apply(lambda x: sorted([col.replace('"','').strip() for col in x[1:-1].split(",") if col != ""])) 
-versus = df[['uid','amenities']]
+versus = df[['id','amenities']]
 
 #%%
 for i in list_of_all_amenities:
@@ -65,12 +65,12 @@ versus.drop('amenities', axis=1, inplace = True)
 #%%
 versus.dropna(axis=0,inplace=True)
 for i in versus.columns: 
-    if i !='uid':
+    if i !='id':
         if sum(versus[i]) < 100:
             print(i,sum(versus[i]))
 
 #%%
-df_with_amenities = df.merge(versus, on = 'uid', how = 'left')
+df_with_amenities = df.merge(versus, on = 'id', how = 'left')
 
 #%%
 
@@ -79,6 +79,7 @@ df = df_with_amenities.copy()
 #%%
 # Finding Variables that have high correlation 
 high_corr = pd.DataFrame(df.corr().abs().unstack()[df.corr().abs().unstack().sort_values(kind="quicksort")>.8]).reset_index()
+
 #%% 
 # Removed variables with high correlations 
 d_list = list(high_corr[high_corr['level_0']!=high_corr['level_1']]['level_0'].unique())
@@ -93,7 +94,7 @@ df.drop(['host_verifications','translation missing: en.hosting_amenity_49','tran
 #Verify that none of the rows with Plus listings have null 
 # Dropping all rows with NA  cause doesn't affect Plus listings
 # Changes object types into dummy variables 
-items=[categorical for categorical in list(df.select_dtypes('object').columns) if categorical not in list_of_all_amenities and categorical != "amenities" and categorical != "uid"]
+items=[categorical for categorical in list(df.select_dtypes('object').columns) if categorical not in list_of_all_amenities and categorical != "amenities" and categorical != "id"]
 for cols in items:
     add = pd.get_dummies(df[cols],drop_first=True,prefix=cols).astype('bool')
     df=pd.concat([df,add], axis=1)
