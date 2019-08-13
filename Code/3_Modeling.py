@@ -82,10 +82,7 @@ def model_train_predict_matrix(model_type):
     predictions = model.predict(X_test)
     _,FP,FN,TP = confusion_matrix(y_test, predictions).ravel()
     return [TP,FP,model ,FN]
-#%%
-good_vars = ['isPlus']
 
-#%%
 import time 
 start_time = time.time()
 log_params = {
@@ -110,7 +107,7 @@ def rand_grid(params, model):
     grid.fit(X_train,y_train)
     new_model = model.set_params(**grid.best_params_)
     print("Optimal Model Found")
-    output_file = "files/" + str(new_model).split("(")[0]+".sav"
+    output_file = "models/" + str(new_model).split("(")[0]+".sav"
     pickle.dump(new_model,open(output_file, "wb"))
     return new_model
 
@@ -122,10 +119,10 @@ X_train, X_test, y_train, y_test = train_test_split(df_model.drop(good_vars,axis
 #rf = rand_grid(rf_params, RandomForestClassifier())
 #xgb = rand_grid(xgb_params,XGBClassifier())
 
-log = pickle.load(open("files/LogisticRegression.sav","rb"))
-bnb = pickle.load(open("files/BernoulliNB.sav","rb"))
-rf = pickle.load(open("files/RandomForestClassifier.sav","rb"))
-xgb = pickle.load(open("files/XGBClassifier.sav","rb"))
+log = pickle.load(open("models/LogisticRegression.sav","rb"))
+bnb = pickle.load(open("models/BernoulliNB.sav","rb"))
+rf = pickle.load(open("models/RandomForestClassifier.sav","rb"))
+xgb = pickle.load(open("models/XGBClassifier.sav","rb"))
 
 
 print("Parameter Search time in Seconds: ",time.time()-start_time)
@@ -155,6 +152,7 @@ print(scores.describe())
 print("K-fold time in Seconds: ",time.time()-start_time)
 
 # Looking into undersampling 
+np.random.seed(1)
 number_of_plus = sum(df_model['isPlus'])
 non_plus_index = df_model[df_model['isPlus'] == False].index
 random_index = np.random.choice(non_plus_index,number_of_plus,replace=False)
@@ -163,6 +161,8 @@ under_sampled_indexes = np.concatenate([plus_index,random_index])
 under_sample = df_model.loc[under_sampled_indexes]
 X_under = under_sample.drop('isPlus',1)
 y_under = under_sample['isPlus']
+
+
 X_under_train, X_under_test, y_under_train, y_under_test = train_test_split(
     X_under,y_under,test_size = 0.3, random_state = 0)
 
