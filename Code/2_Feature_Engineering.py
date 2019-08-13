@@ -27,6 +27,36 @@ def feature_engineering(city,list_of_amenities):
     df['number_of_unique_amenities'] = df['amenities'].apply(lambda x: len(set(x.split(',')))) 
     # Calculates number of Verifications host provides 
     df['number_of_host_verifications'] = df['host_verifications'].apply(lambda x: len(set(x.split(','))))
+    
+    calendar_update = { '1 week ago': 7,
+                        '10 months ago': 300,
+                        '11 months ago': 330,
+                        '12 months ago': 365,
+                        '2 days ago': 2,
+                        '2 months ago': 61,
+                        '2 weeks ago': 14,
+                        '3 days ago': 3,
+                        '3 months ago': 91,
+                        '3 weeks ago': 21,
+                        '4 days ago': 4,
+                        '4 months ago': 121,
+                        '4 weeks ago': 28,
+                        '5 days ago': 5,
+                        '5 months ago': 151,
+                        '5 weeks ago': 35,
+                        '6 days ago': 6,
+                        '6 months ago': 181,
+                        '6 weeks ago':42,
+                        '7 months ago':211,
+                        '7 weeks ago':49,
+                        '8 months ago':241,
+                        '9 months ago': 271,
+                        'a week ago':7,
+                        'today':0,
+                        'yesterday':1
+    }
+   
+    df['calendar_updated'] = df['calendar_updated'].map(calendar_update).apply(lambda x: x if type(x) == float else 365)
     df['amenities'] = df['amenities'].apply(lambda x: sorted([col.replace('"','').strip() for col in x[1:-1].split(",") if col != ""])) 
     versus = df[['id','amenities']]
     for i in list_of_amenities:
@@ -64,21 +94,20 @@ def missing_inpute(df, city):
     bathroom_1 = df[df['bedrooms']==1]['bathrooms'].dropna().mean()
     bathroom_1_ind = df[(df['bedrooms']==1) & (df['bathrooms'].isna())].index
     
-    for ind in bedroom_1_ind:
-        df.at[ind,'bedrooms'] = bedroom_1 
+    df.at[bedroom_1_ind,'bedrooms'] = bedroom_1 
+
+    df.at[bedroom_2_ind,'bedrooms'] = bedroom_2 
     
-    for ind in bedroom_2_ind:
-        df.at[ind,'bedrooms'] = bedroom_2 
-        
-    for ind in bathroom_1_ind: 
-        df.at[ind,'bathrooms'] = bathroom_1 
+    df.at[bathroom_1_ind,'bathrooms'] = bathroom_1 
+    
+    df.at[df[df['calendar_updated'].isna()].index,'calendar_updated'] = 365
+
     df_no_na = df.copy().dropna(0)
     if city =="LA":
         review_na_cols = [cols for cols in df_no_na.columns if "review_scores" in cols]
         object_cols = list(df_no_na.select_dtypes("object").columns)
-        print(object_cols)    
-        print(review_na_cols)
-        print(len(object_cols+review_na_cols))
+        X = df_no_na.drop(review_na_cols+object_cols, 1).columns
+        pickle.dump(X, open("files/transformations/cols_used.sav","wb"))
         X = df_no_na.drop(review_na_cols+object_cols, 1).as_matrix()
         for cols in review_na_cols:
             y = df_no_na[cols].dropna().as_matrix()
@@ -90,12 +119,9 @@ def missing_inpute(df, city):
             pickle.dump(lin, open("files/transformations/linear_missing_"+cols+".sav", 'wb'))
     else: 
         review_na_cols = [cols for cols in df_no_na.columns if "review_scores" in cols]
-        object_cols = list(df_no_na.select_dtypes("object").columns + df_no_na.select_dtypes("bool").columns)
-        print(object_cols)    
-        print(review_na_cols)
-        print(len(object_cols+review_na_cols))
+        cols_used = pickle.load(open("files/transformations/cols_used.sav","rb"))
         for cols in review_na_cols:
-            to_pred = df[df[cols].isna()].drop(review_na_cols+object_cols,1).as_matrix()
+            to_pred = df[df[cols].isna()][cols_used].as_matrix()
             lin = pickle.load(open("files/transformations/linear_missing_"+cols+".sav",'rb'))
             pred = lin.predict(to_pred)
             df[cols].loc[df[cols].isna()] = pred
@@ -110,6 +136,13 @@ def merge_columns(LA,SF):
     sf = list(SF.columns)
     la_col = [col for col in la if col not in sf]
     sf_col = [col for col in sf if col not in la]
+    for cols in la_col:
+        SF[cols] = False 
+    for cols in sf_col:
+        LA[cols] = False 
+    if len(LA.columns) != len(SF.columns):
+        print("ERROR")
+        quit()
     return LA,SF
 
 def amenities(LA,SF):
@@ -150,4 +183,6 @@ if __name__ == "__main__":
     df_LA = feature_engineering('LA',list_of_amenities)
     df_SF = feature_engineering('SF',list_of_amenities)
     df_LA, df_SF = merge_columns(df_LA,df_SF)
+    missing_inpute(df_LA,"LA")
+    missing_inpute(df_SF,"SF")
     print("--- %s seconds ---" % (time.time() - start_time))
