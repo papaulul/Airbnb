@@ -9,7 +9,7 @@ import math
 am_i_local = "yes"
 if am_i_local == "yes":
     try:
-        os.chdir(os.path.join(os.getcwd(), '../2019 Spring/SpringAccel'))
+        os.chdir(os.path.join(os.getcwd(), '../SpringAccel'))
         print(os.getcwd())
     except:
         pass
@@ -17,12 +17,12 @@ sns.set_style('whitegrid')
 sns.set_palette("husl")
 #%% 
 # Read in both LA and SF datasets
-file_path = 'files/LA_2.csv'
-file_path_sf = 'files/SF_2.csv'
+file_path = 'files/july19/LA_2.csv'
+file_path_sf = 'files/july19/SF_2.csv'
 la = pd.read_csv(file_path,index_col = 0)
 sf = pd.read_csv(file_path_sf, index_col= 0)
-output_la = 'files/LA_2b.csv'
-output_sf = 'files/SF_2b.csv'
+output_la = 'files/july19/LA_2b.csv'
+output_sf = 'files/july19/SF_2b.csv'
 
 #%%
 # Found missing columns from SF and LA but taking the difference of the set of columns
@@ -48,9 +48,9 @@ def jaccard(df_model):
     feats = []
     # grabs all boolean variables 
     d_base_bool=df_model.select_dtypes(include='bool')
-
+    d_base_bool = d_base_bool[[col for col in d_base_bool.columns if "_" not in col]]
     ###Similarity
-    jac_sim=1-pairwise_distances(d_base_bool.T, metric = "jaccard")
+    jac_sim=1-pairwise_distances(d_base_bool.T.as_matrix(), metric = "jaccard")
     # Dataframe, index and columns are the boolean variables 
     jac_sim = pd.DataFrame(jac_sim, index=d_base_bool.columns, columns=d_base_bool.columns)
     # Gets isPlus similarities with all other variables sorted 
@@ -64,7 +64,7 @@ def jaccard(df_model):
         for j in c_important:
             if i!=j:
                 max_sim=max(max_sim,jac_sim.loc[i,j])
-        if max_sim>0 and max_sim<0.6 and jac_sim.loc[i,'isPlus']>.1:
+        if max_sim>0 and max_sim<0.6 and jac_sim.loc[i,'isPlus']>.07:
             c_important.append(i)
     # Append the important columns 
     feats.append(c_important)
@@ -80,14 +80,14 @@ important_cols = jaccard(full)
 # Going to drop any amenities that are not important 
 places = [la,sf]
 for place in places:
-    for i in place.columns:
+    for i in [cols for cols in place.columns if "_" not in place.columns]:
         try: 
             if place[i].dtype == 'bool' and i not in important_cols and i != 'isPlus':
                 place.drop(i,axis=1,inplace = True)
         except:
                 pass
     # Also dropping couple of others that were not important
-    drop_list = ['host_has_profile_pic','host_identity_verified','host_is_superhost','instant_bookable','require_guest_phone_verification','require_guest_profile_picture','listing_count','is_location_exact']
+    drop_list = ['host_has_profile_pic','host_identity_verified','host_is_superhost','instant_bookable','require_guest_phone_verification','require_guest_profile_picture','is_location_exact']
     place.drop(drop_list, axis=1, inplace=True)
 
 #%%
@@ -100,23 +100,25 @@ for place in places:
     place.drop(['latitude','longitude'],axis=1,inplace=True)
     # Was lazy, so I decided here was the place to change interger columns to float
     place[place.select_dtypes('int').columns] = place.select_dtypes('int').astype('float')
-#%%
 
 #%%
 # Look at all float columns
+count = 1
 for ind,place in enumerate(places):
     for j,i in enumerate(sorted(place.select_dtypes('float').columns)): 
-        plt.figure(j+10**ind)
-        plt.hist(i, data = place)
+        plt.figure(count)
+        plt.hist(i, data = place, range= tuple(place[i].quantile([.01,.99]).values))
         if ind == 0: 
             city = 'LA'
         else:
             city = 'SF'
         plt.title(city+": "+i)
-        print('\n')
+        count+=1
+
 # Pulled any columns that were right skewed 
 # Except those that involve price. I didn't want to touch those columns
-right_skewed = ['reviews_per_month','number_of_reviews','guests_included','extra_people','d_long','d_lat','beds','bedrooms','bathrooms','accommodates']
+#%%
+right_skewed = ['bathrooms','bedrooms','calculated_host_listings_count_private_rooms','calculated_host_listings_count_shared_rooms','calendar_updated', 'cleaning_fee','d_lat','d_long','extra_people','guests_included','number_of_reviews','price','security_deposit']
 
 import math
 for place in places: 
@@ -128,16 +130,17 @@ for place in places:
 ##%% 
 #%%
 # checking to see if we fixed the skewed data
+count = 1
 for ind,place in enumerate(places):
     for j,i in enumerate(sorted(place.select_dtypes('float').columns)): 
-        plt.figure(j+10**ind)
-        plt.hist(i, data = place)
+        plt.figure(count)
+        plt.hist(i, data = place, range= tuple(place[i].quantile([.01,.99]).values))
         if ind == 0: 
             city = 'LA'
         else:
             city = 'SF'
         plt.title(city+": "+i)
-        print('\n')
+        count+=1
 #%%
 #setting columns the same order and outputting data
 sf = sf[sorted(sf.columns)]
