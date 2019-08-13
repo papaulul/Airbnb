@@ -1,4 +1,3 @@
-perfect_models/*
 models/*
 files/*
 Airbnb/air.csv
@@ -6,3 +5,5 @@ Airbnb/airbnb_plus.csv
 Airbnb/*.csv
 .vscode
 .ipynb_checkpoints
+AWS_Pkim.pem
+requirements.txt
