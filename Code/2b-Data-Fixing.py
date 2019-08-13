@@ -13,20 +13,16 @@ if am_i_local == "yes":
         print(os.getcwd())
     except:
         pass
-from IPython.display import display
-pd.options.display.max_columns = None
-
-
 sns.set_style('whitegrid')
 sns.set_palette("husl")
 #%% 
 # Read in both LA and SF datasets
-file_path = 'files/LA-2.csv'
-file_path_sf = 'files/SF-2.csv'
+file_path = 'files/LA_2.csv'
+file_path_sf = 'files/SF_2.csv'
 la = pd.read_csv(file_path,index_col = 0)
 sf = pd.read_csv(file_path_sf, index_col= 0)
-output_la = 'files/LA-2b.csv'
-output_sf = 'files/SF-2b.csv'
+output_la = 'files/LA_2b.csv'
+output_sf = 'files/SF_2b.csv'
 
 #%%
 # Found missing columns from SF and LA but taking the difference of the set of columns
