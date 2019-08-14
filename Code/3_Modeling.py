@@ -11,12 +11,25 @@ import time
 from sklearn.model_selection import train_test_split, RandomizedSearchCV, StratifiedKFold
 from sklearn.linear_model import LogisticRegression
 from sklearn.naive_bayes import BernoulliNB
-from sklearn import preprocessing
+from sklearn.preprocessing import StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report,confusion_matrix, recall_score, accuracy_score
 from sklearn.metrics.pairwise import pairwise_distances
 from xgboost import XGBClassifier
 start_time = time.time()
+
+def scaled(X):
+    # Iniate Standard Scaler
+    ss = StandardScaler()
+    # Making sure scaling floats
+    to_scale = X.select_dtypes("float")
+    # Getting transformed values
+    scaled = ss.fit_transform(to_scale)
+    # Saving fit for SF dataset 
+    pickle.dump(ss, open("models/scaler.pkl","wb"))
+    # Setting values to table
+    X[to_scale.columns] = pd.DataFrame(scaled, columns = to_scale.columns)
+    return X
 
 def met(TP,FP,FN): 
     """
@@ -104,7 +117,7 @@ def param_search(X,y):
         y,train_size = 0.75,stratify=y, random_state=999)
 
     # Change this if you don't want to run the grid search
-    first_run = False 
+    first_run = True 
     if first_run: 
         log = rand_grid(log_params,LogisticRegression(solver="liblinear"),X_train,y_train)
         bnb = rand_grid(bnb_params,BernoulliNB(),X_train,y_train)
@@ -221,6 +234,9 @@ if __name__ == "__main__":
     # Setting up the dataframes
     X = df_model.drop('isPlus',axis= 1)
     y = df_model['isPlus']
+    
+    # Scaling model
+    X = scaled(X)
     # Setting models as more of a global variable
     log, bnb, rf, xgb = param_search(X,y)
     kfold(X,y)

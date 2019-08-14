@@ -7,6 +7,17 @@ from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.metrics import classification_report,confusion_matrix, accuracy_score, recall_score
 start_time = time.time()
 
+def scaled(X):
+    # Iniate Standard Scaler
+    ss = pickle.load(open("models/scaler.pkl","rb"))
+    # Making sure scaling floats
+    to_scale = X.select_dtypes("float")
+    # Getting transformed values
+    scaled = ss.fit_transform(to_scale)
+    # Setting values to table
+    X[to_scale.columns] = pd.DataFrame(scaled, columns = to_scale.columns)
+    return X
+
 if __name__ == "__main__":
     os.chdir('/Users/pkim/Dropbox/Projects/SpringAccel')
     # Path to file
@@ -14,6 +25,8 @@ if __name__ == "__main__":
     df = pd.read_csv(file_path,index_col = 0)
     df_model = df.drop(['id','amenities','host_id'],1).copy()
     # Undersampling, keeping it the same as the previous file
+    df_model = scaled(df_model)
+    
     np.random.seed(1)
     number_of_plus = sum(df_model['isPlus'])
     non_plus_index = df_model[df_model['isPlus'] == False].index
