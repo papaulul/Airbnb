@@ -1,5 +1,9 @@
 models/*
-files/*
+files/*.csv
+files/july19/*
+files/Old/*
+files/plots/*
+files/transformations/*
 Airbnb/air.csv
 Airbnb/airbnb_plus.csv
 Airbnb/*.csv
