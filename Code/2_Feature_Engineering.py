@@ -208,7 +208,12 @@ def remove_corr(df, city):
         # Finds variables that have correlation > .8 
         high_corr = pd.DataFrame(df.corr().abs().unstack()[df.corr().abs().unstack().sort_values(kind="quicksort")>.8]).reset_index()
         # Removing those where the variable is correlated with itself
-        d_list = list(high_corr[high_corr['level_0']!=high_corr['level_1']]['level_0'].unique())
+        # Getting the Correlation Column
+        d_list_cols = high_corr[high_corr['level_0']!=high_corr['level_1']].columns
+        # Finding the index of the first variable with correlated values. To not remove both correlated variables
+        final_index = high_corr[high_corr['level_0']!=high_corr['level_1']][d_list_cols[2]].drop_duplicates().index
+        # list of all unique variables to remove that are too correlated
+        d_list = list(high_corr[high_corr['level_0']!=high_corr['level_1']].loc[final_index]['level_1'].unique())
         # Dumping the correlated variables into a file for SF to use
         pickle.dump(d_list, open("files/july19/correlated_var.txt",'wb'))
     else: 
@@ -220,6 +225,7 @@ def remove_corr(df, city):
     # Dropping all correlated variables
     df = df.drop(d_list, axis=1)
     return df
+
 
 
 
