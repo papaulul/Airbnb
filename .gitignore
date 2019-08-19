@@ -11,3 +11,4 @@ Airbnb/*.csv
 .ipynb_checkpoints
 AWS_Pkim.pem
 requirements.txt
+./.DS_Store
