@@ -15,6 +15,15 @@ Why would owners want to go through the effort to achieve this rating? According
 Using data from [Inside Airbnb](http://insideairbnb.com/get-the-data.html) and personally scraped data, I will be looking into two cities, Los Angeles and San Fransico. 
 
 ## Dependencies/Setup 
+* python == 3.7.4
+* Matplot-lib == 3.1.0
+* numpy == 1.16.4
+* pandas == 0.24.2
+* scikit-learn == 0.21.2 
+* seaborn == 0.9.0
+* xgboost == 0.90
 
 
+## Website
+[pkimportfolio.com/airbnb](http://pkimportfolio.com/airbnb)
 
